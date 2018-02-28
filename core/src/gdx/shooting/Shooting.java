@@ -22,9 +22,9 @@ public class Shooting extends ApplicationAdapter implements InputProcessor {
     ShapeRenderer SR;
     ArrayList<gdx.shooting.bullets> bullets = new ArrayList<bullets>();
     int nMax = 0, nDir;
-    float fPlatX, fPlatY, fPlatWidth, fPlatHeight, fPlayX, fPlayY, fPlayWidth, fPlayHeight, fVelocity, fGravity, fFallSpeed, fBulletX, fBulletY;
+    float fPlatX, fPlatY, fPlatWidth, fPlatHeight, fPlayWidth, fPlayHeight, fVelocity, fGravity;
     Vector2 playerPos, mousePos, vDir, bulletPos;
-    boolean canJump, isShoot, isHit;
+    boolean canJump, isOnGround;
 
     @Override
     public void create() {
@@ -37,12 +37,10 @@ public class Shooting extends ApplicationAdapter implements InputProcessor {
         fPlatY = 0;
         fPlatWidth = Gdx.graphics.getWidth();
         fPlatHeight = 100;
-        fPlayX = Gdx.graphics.getWidth() / 2;
-        fPlayY = Gdx.graphics.getHeight() / 2;
         fPlayWidth = 50;
         fPlayHeight = 50;
         fGravity = (float) 0.1;
-        playerPos = new Vector2(fPlayX , fPlayY);
+        playerPos = new Vector2(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
         mousePos = new Vector2(0, 0);
         nDir = 1; //direction of the bullets, 1 for left, 2 for right, and 3 for up
 
@@ -79,7 +77,7 @@ public class Shooting extends ApplicationAdapter implements InputProcessor {
     public void hitDetection() {
         if (playerPos.y <= fPlatY + fPlatHeight) {
              fVelocity = 5;
-             isHit = true;
+             isOnGround = true;
              canJump = false;
         //}
         } else {
@@ -98,7 +96,7 @@ public class Shooting extends ApplicationAdapter implements InputProcessor {
         }
         if(Gdx.input.isKeyPressed(Input.Keys.W)) {
             nDir = 3;
-            if(isHit == true) {
+            if(isOnGround == true) {
                 canJump = true;
             }
         }
@@ -108,29 +106,27 @@ public class Shooting extends ApplicationAdapter implements InputProcessor {
         }
     }
 
-    public void bullet() {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && nMax < 4) {
+    public void bullet() { //making the bullets
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && nMax < 4) { // max of 4 bullets
             nMax++;
             mousePos.set(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
             vDir = mousePos.sub(playerPos);
             bulletPos = new Vector2(playerPos.x + 20, playerPos.y + 20);
-            // fBulletX = 0;
-            // fBulletY = Gdx.graphics.getHeight()/2;
             bullets.add(new bullets(bulletPos, vDir, SR, nDir));
         }
     }
 
-    public void spawn() {
+    public void spawn() { //showing the bullets
         for (int i = 0; i < bullets.size(); i++) {
             bullets.get(i).Update();
             if (isOutOfRange(bullets.get(i))){
                 bullets.remove(i);
-                nMax--;
+                nMax--; //resets if out of range
             }
         }
     }
     
-    private boolean isOutOfRange(bullets bullet) {
+    private boolean isOutOfRange(bullets bullet) { // if the bullets are hitting the ground or touching the sides of the screens
         return bullet.vPos.x < 0 || bullet.vPos.x > Gdx.graphics.getWidth() ||
                 bullet.vPos.y <= fPlatY + fPlatHeight;
     }
@@ -152,21 +148,11 @@ public class Shooting extends ApplicationAdapter implements InputProcessor {
 
     @Override
     public boolean touchDown(int i, int i1, int i2, int i3) {
-        isShoot = false;
         return false;
     }
 
     @Override
     public boolean touchUp(int i, int i1, int i2, int i3) {
-//        mousePos.set(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
-//        
-//        Vector2 dir = mousePos.sub(playerPos);
-//
-//        dir.setLength(0.1f);
-//        dir.limit(1);
-//        playerPos.add(dir);
-        isShoot = true;
-        System.out.println("shoot");
         return false;
     }
 
